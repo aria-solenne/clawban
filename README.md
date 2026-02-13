@@ -51,6 +51,10 @@ Open:
 
 - Data shape is validated with `zod` on read/write.
 
+## Docs
+
+- See `docs/USAGE.md`
+
 ## Next steps (if you want)
 
 - Real DB (SQLite + Prisma)
