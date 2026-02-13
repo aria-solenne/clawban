@@ -10,8 +10,8 @@ const TaskRowSchema = z.object({
   assignee: z.enum(ASSIGNEES),
   status: z.enum(STATUSES),
   priority: z.enum(PRIORITIES),
-  created_at: z.date(),
-  updated_at: z.date(),
+  created_at: z.coerce.date(),
+  updated_at: z.coerce.date(),
 });
 
 type TaskRow = z.infer<typeof TaskRowSchema>;

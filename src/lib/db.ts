@@ -25,6 +25,7 @@ export async function ensureSchema() {
   if (schemaReady) return;
 
   // Basic schema, no fancy migrations for v1.
+  // Keep statements separate for max compatibility with serverless + prepared statements.
   await s/* sql */`
     create table if not exists tasks (
       id text primary key,
@@ -35,10 +36,11 @@ export async function ensureSchema() {
       priority text not null,
       created_at timestamptz not null,
       updated_at timestamptz not null
-    );
-    create index if not exists tasks_status_idx on tasks(status);
-    create index if not exists tasks_updated_at_idx on tasks(updated_at desc);
+    )
   `;
+
+  await s/* sql */`create index if not exists tasks_status_idx on tasks(status)`;
+  await s/* sql */`create index if not exists tasks_updated_at_idx on tasks(updated_at desc)`;
 
   schemaReady = true;
 }
