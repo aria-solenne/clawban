@@ -15,7 +15,17 @@ Create `.env.local`:
 CLAWBAN_EDIT_PASSWORD="choose-a-strong-password"
 ```
 
-2) Run
+2) (Optional) Enable programmatic edits (agent/API)
+
+Set an additional env var:
+```bash
+CLAWBAN_AGENT_TOKEN="some-long-random-token"
+```
+
+Then your scripts can call write endpoints with:
+- `Authorization: Bearer $CLAWBAN_AGENT_TOKEN`
+
+3) Run
 
 ```bash
 npm install

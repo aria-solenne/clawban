@@ -22,7 +22,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    await requireEdit();
+    await requireEdit(req);
   } catch {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }

@@ -3,6 +3,10 @@ import { cookies } from "next/headers";
 
 const COOKIE = "clawban_edit";
 
+function agentToken(): string {
+  return process.env.CLAWBAN_AGENT_TOKEN ?? "";
+}
+
 type Payload = {
   iat: number; // ms
   exp: number; // ms
@@ -59,20 +63,28 @@ function verifyToken(token: string, sec: string): Payload | null {
   }
 }
 
-export async function canEditFromRequest(): Promise<boolean> {
+export async function canEditFromRequest(req?: Request): Promise<boolean> {
   const sec = secret();
   if (!sec) return false;
+
+  // Option A: agent token for programmatic access
+  const at = agentToken();
+  if (req && at) {
+    const hdr = req.headers.get("authorization") ?? "";
+    const m = hdr.match(/^Bearer\s+(.+)$/i);
+    if (m && m[1] === at) return true;
+  }
+
+  // Option B: browser cookie after password unlock
   const jar = await cookies();
   const token = jar.get(COOKIE)?.value;
   if (!token) return false;
   return !!verifyToken(token, sec);
 }
 
-export async function requireEdit(): Promise<void> {
-  const ok = await canEditFromRequest();
-  if (!ok) {
-    throw new Error("EDIT_FORBIDDEN");
-  }
+export async function requireEdit(req?: Request): Promise<void> {
+  const ok = await canEditFromRequest(req);
+  if (!ok) throw new Error("EDIT_FORBIDDEN");
 }
 
 export async function unlockWithPassword(pw: string): Promise<boolean> {

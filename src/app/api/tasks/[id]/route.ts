@@ -19,7 +19,7 @@ const PatchSchema = z
 
 export async function PATCH(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    await requireEdit();
+    await requireEdit(_req);
   } catch {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
@@ -32,7 +32,7 @@ export async function PATCH(_req: Request, ctx: { params: Promise<{ id: string }
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   try {
-    await requireEdit();
+    await requireEdit(_req);
   } catch {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
