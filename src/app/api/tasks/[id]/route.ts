@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { deleteTask, upsertTask } from "@/lib/store";
+import { requireEdit } from "@/lib/auth";
 import { ASSIGNEES, PRIORITIES, STATUSES } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +17,12 @@ const PatchSchema = z
   .strict();
 
 export async function PATCH(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  try {
+    await requireEdit();
+  } catch {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+
   const { id } = await ctx.params;
   const body = PatchSchema.parse(await _req.json());
   const task = await upsertTask({ id, ...body });
@@ -23,6 +30,12 @@ export async function PATCH(_req: Request, ctx: { params: Promise<{ id: string }
 }
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  try {
+    await requireEdit();
+  } catch {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+
   const { id } = await ctx.params;
   await deleteTask(id);
   return NextResponse.json({ ok: true });

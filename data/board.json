@@ -14,11 +14,11 @@
       "id": "seed-2",
       "title": "Add first real task",
       "description": "Rajin: drop a task here and I'll keep it updated.",
-      "assignee": "rajin",
+      "assignee": "unassigned",
       "status": "todo",
-      "priority": "med",
+      "priority": "low",
       "createdAt": "2026-02-13T00:00:00.000Z",
-      "updatedAt": "2026-02-13T00:00:00.000Z"
+      "updatedAt": "2026-02-13T19:05:27.908Z"
     }
   ]
 }

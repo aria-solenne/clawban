@@ -8,6 +8,15 @@ Local-only kanban board for Rajin + Aria.
 
 ## Dev
 
+1) Set edit password (optional)
+
+Create `.env.local`:
+```bash
+CLAWBAN_EDIT_PASSWORD="choose-a-strong-password"
+```
+
+2) Run
+
 ```bash
 npm install
 npm run dev -- --hostname 0.0.0.0 --port 3042

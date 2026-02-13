@@ -15,6 +15,7 @@ import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-
 import clsx from "clsx";
 
 import type { Assignee, Board as BoardT, Priority, Status, Task } from "@/lib/types";
+import { UnlockEditing } from "@/app/ui/UnlockEditing";
 import { ASSIGNEES, PRIORITIES, STATUSES, STATUS_LABEL } from "@/lib/types";
 
 function byUpdatedDesc(a: Task, b: Task) {
@@ -278,12 +279,15 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
 function DraggableCard({
   task,
   onQuickPatch,
+  canEdit,
 }: {
   task: Task;
   onQuickPatch: (id: string, patch: Partial<Task>) => void;
+  canEdit: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
+    disabled: !canEdit,
   });
 
   const style: React.CSSProperties = {
@@ -295,39 +299,42 @@ function DraggableCard({
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <Card task={task} />
-      <div className="mt-1 flex flex-wrap items-center justify-between gap-2 px-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <button
-            onClick={() =>
-              onQuickPatch(task.id, {
-                priority: task.priority === "high" ? "med" : task.priority === "med" ? "low" : "high",
-              })
-            }
-            className="rounded-full border border-ink/10 bg-paper/45 px-2 py-1 text-[11px] text-ink/65 hover:border-ink/20"
-          >
-            priority ↻
-          </button>
-          <button
-            onClick={() =>
-              onQuickPatch(task.id, {
-                assignee:
-                  task.assignee === "unassigned"
-                    ? "rajin"
-                    : task.assignee === "rajin"
-                      ? "aria"
-                      : task.assignee === "aria"
-                        ? "both"
-                        : "unassigned",
-              })
-            }
-            className="rounded-full border border-ink/10 bg-paper/45 px-2 py-1 text-[11px] text-ink/65 hover:border-ink/20"
-          >
-            assignee ↻
-          </button>
-        </div>
+      {canEdit ? (
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-2 px-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              onClick={() =>
+                onQuickPatch(task.id, {
+                  priority:
+                    task.priority === "high" ? "med" : task.priority === "med" ? "low" : "high",
+                })
+              }
+              className="rounded-full border border-ink/10 bg-paper/45 px-2 py-1 text-[11px] text-ink/65 hover:border-ink/20"
+            >
+              priority ↻
+            </button>
+            <button
+              onClick={() =>
+                onQuickPatch(task.id, {
+                  assignee:
+                    task.assignee === "unassigned"
+                      ? "rajin"
+                      : task.assignee === "rajin"
+                        ? "aria"
+                        : task.assignee === "aria"
+                          ? "both"
+                          : "unassigned",
+                })
+              }
+              className="rounded-full border border-ink/10 bg-paper/45 px-2 py-1 text-[11px] text-ink/65 hover:border-ink/20"
+            >
+              assignee ↻
+            </button>
+          </div>
 
-        <span className="text-[10px] text-ink/40">drag me</span>
-      </div>
+          <span className="text-[10px] text-ink/40">drag me</span>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -336,16 +343,18 @@ export function Board() {
   const [board, setBoard] = React.useState<BoardT | null>(null);
   const [err, setErr] = React.useState<string | null>(null);
   const [activeId, setActiveId] = React.useState<string | null>(null);
+  const [canEdit, setCanEdit] = React.useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   React.useEffect(() => {
     let alive = true;
-    api<BoardT>("/api/tasks")
-      .then((b) => {
+    Promise.all([api<BoardT>("/api/tasks"), api<{ canEdit: boolean }>("/api/auth")])
+      .then(([b, a]) => {
         if (!alive) return;
         b.tasks.sort(byUpdatedDesc);
         setBoard(b);
+        setCanEdit(a.canEdit);
       })
       .catch((e) => setErr(e?.message ?? "Failed to load"));
     return () => {
@@ -438,9 +447,15 @@ export function Board() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <NewTask
-                onCreate={(task) => setBoard((cur) => ({ tasks: [task, ...(cur?.tasks ?? [])].sort(byUpdatedDesc) }))}
-              />
+              {canEdit ? (
+                <NewTask
+                  onCreate={(task) =>
+                    setBoard((cur) => ({ tasks: [task, ...(cur?.tasks ?? [])].sort(byUpdatedDesc) }))
+                  }
+                />
+              ) : (
+                <UnlockEditing onUnlock={() => setCanEdit(true)} />
+              )}
             </div>
           </div>
         </header>
@@ -461,7 +476,7 @@ export function Board() {
                       <ColumnDropTarget status={status} />
                       <SortableContext items={items.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                         {items.map((t) => (
-                          <DraggableCard key={t.id} task={t} onQuickPatch={patchTask} />
+                          <DraggableCard key={t.id} task={t} onQuickPatch={patchTask} canEdit={canEdit} />
                         ))}
                       </SortableContext>
                       {items.length === 0 ? (
