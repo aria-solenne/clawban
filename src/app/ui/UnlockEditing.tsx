@@ -36,18 +36,18 @@ export function UnlockEditing({ onUnlock }: { onUnlock: () => void }) {
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <div className="rounded-full border border-ink/15 bg-paper/70 px-3 py-1.5 text-[13px] text-ink/70 shadow-sm">
+      <div className="rounded-full border border-white/10 bg-bg1 px-3 py-1.5 text-[13px] text-muted shadow-sm">
         View-only
       </div>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="rounded-full border border-ink/15 bg-paper/70 px-3 py-1.5 text-[13px] text-ink hover:border-ink/25 shadow-sm"
+        className="rounded-full border border-white/10 bg-bg1 px-3 py-1.5 text-[13px] text-ink hover:border-white/20 shadow-sm"
       >
         Unlock editing
       </button>
 
       {open ? (
-        <div className="w-full rounded-3xl border border-ink/10 bg-paper/70 p-3 shadow-sm">
+        <div className="w-full rounded-3xl border border-white/10 bg-bg1 p-3 shadow-sm">
           <div className="grid gap-2 md:grid-cols-[1fr_auto]">
             <label>
               <div className="mb-1 text-[11px] tracking-wide text-ink/60">Edit password</div>
@@ -58,14 +58,14 @@ export function UnlockEditing({ onUnlock }: { onUnlock: () => void }) {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") submit();
                 }}
-                className="w-full rounded-2xl border border-ink/10 bg-paper/60 px-3 py-2 text-[13px] text-ink outline-none focus:border-ink/25"
+                className="w-full rounded-2xl border border-white/10 bg-bg2 px-3 py-2 text-[13px] text-ink outline-none focus:border-white/20"
               />
             </label>
 
             <div className="flex items-end justify-end gap-2">
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-full border border-ink/15 bg-transparent px-3 py-1.5 text-[13px] text-ink/80 hover:border-ink/25"
+                className="rounded-full border border-white/10 bg-transparent px-3 py-1.5 text-[13px] text-ink/80 hover:border-white/20"
               >
                 Cancel
               </button>
@@ -84,7 +84,7 @@ export function UnlockEditing({ onUnlock }: { onUnlock: () => void }) {
           </div>
 
           {err ? <div className="mt-2 text-[12px] text-hot">{err}</div> : null}
-          <div className="mt-2 text-[11px] text-ink/55">
+          <div className="mt-2 text-[11px] text-muted">
             This sets an edit cookie in your browser (30 days).
           </div>
         </div>

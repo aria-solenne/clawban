@@ -41,7 +41,7 @@ function Pill({ children, tone }: { children: React.ReactNode; tone: "ink" | "wa
     <span
       className={clsx(
         "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] tracking-wide",
-        tone === "ink" && "border-ink/15 bg-paper/60 text-ink/80",
+        tone === "ink" && "border-white/10 bg-bg1 text-ink/80",
         tone === "warn" && "border-warn/25 bg-warn/10 text-warn",
         tone === "hot" && "border-hot/25 bg-hot/10 text-hot"
       )}
@@ -57,41 +57,83 @@ function priorityTone(p: Priority) {
   return "ink";
 }
 
-function assigneeTone(a: Assignee) {
-  if (a === "rajin") return "warn";
-  if (a === "aria") return "hot";
-  if (a === "both") return "hot";
-  return "ink";
+function AssigneeBadge({ assignee }: { assignee: Assignee }) {
+  const src =
+    assignee === "rajin"
+      ? "/avatars/rajin.png"
+      : assignee === "aria"
+        ? "/avatars/aria.jpg"
+        : null;
+
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] tracking-wide",
+        "border-white/10 bg-bg1 text-ink/80"
+      )}
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={src}
+          alt={assignee}
+          className={clsx(
+            "h-4 w-4 rounded-full object-cover",
+            assignee === "aria" && "ring-1 ring-aria/40",
+            assignee === "rajin" && "ring-1 ring-rajin/40"
+          )}
+          loading="lazy"
+        />
+      ) : (
+        <span className="h-4 w-4 rounded-full border border-white/10 bg-bg2" />
+      )}
+      <span>{assignee.toUpperCase()}</span>
+    </span>
+  );
 }
 
 function Card({ task, active }: { task: Task; active?: boolean }) {
   return (
     <article
       className={clsx(
-        "group relative rounded-2xl border bg-paper/70 p-3 shadow-sm backdrop-blur",
-        "border-ink/10 hover:border-ink/20 hover:shadow-md",
-        active && "border-ink/25 shadow-md"
+        "group relative rounded-2xl border p-3 shadow-sm",
+        "bg-bg2 border-white/10",
+        "transition-transform duration-200 hover:-translate-y-0.5",
+        "hover:shadow-[0_14px_40px_rgba(0,0,0,0.45)]",
+        active && "border-white/20"
       )}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-50 aurora" aria-hidden>
+        <div
+          className={clsx(
+            "absolute -inset-[2px] rounded-2xl",
+            task.assignee === "aria" &&
+              "bg-[radial-gradient(circle_at_15%_20%,rgba(98,230,255,0.18),transparent_58%),radial-gradient(circle_at_85%_70%,rgba(255,61,126,0.10),transparent_62%)]",
+            task.assignee === "rajin" &&
+              "bg-[radial-gradient(circle_at_20%_25%,rgba(255,126,68,0.18),transparent_60%),radial-gradient(circle_at_80%_75%,rgba(255,186,77,0.10),transparent_62%)]",
+            (task.assignee === "both" || task.assignee === "unassigned") &&
+              "bg-[radial-gradient(circle_at_20%_25%,rgba(255,126,68,0.12),transparent_62%),radial-gradient(circle_at_80%_70%,rgba(98,230,255,0.12),transparent_62%)]"
+          )}
+        />
+      </div>
+
+      <div className="relative flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="truncate font-display text-[15px] leading-snug text-ink">{task.title}</div>
           {task.description ? (
-            <div className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink/70">
-              {task.description}
-            </div>
+            <div className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-muted">{task.description}</div>
           ) : null}
         </div>
-        <div className="shrink-0 text-[10px] text-ink/45">{new Date(task.updatedAt).toLocaleDateString()}</div>
+        <div className="shrink-0 text-[10px] text-muted">{new Date(task.updatedAt).toLocaleDateString()}</div>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      <div className="relative mt-2 flex flex-wrap items-center gap-1.5">
         <Pill tone={priorityTone(task.priority)}>{task.priority.toUpperCase()}</Pill>
-        <Pill tone={assigneeTone(task.assignee)}>{task.assignee.toUpperCase()}</Pill>
+        <AssigneeBadge assignee={task.assignee} />
         {task.status === "blocked" ? <Pill tone="warn">BLOCKED</Pill> : null}
       </div>
 
-      <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 ring-1 ring-hot/20 transition group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 ring-1 ring-hot/25 transition group-hover:opacity-100" />
     </article>
   );
 }
@@ -109,14 +151,14 @@ function ColumnShell({
     <section className="flex h-full min-h-0 flex-col">
       <header className="mb-2 flex items-baseline justify-between gap-3 px-1">
         <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-ink/50" />
+          <div className="h-2 w-2 rounded-full bg-white/40 floaty" />
           <div className="font-display text-[14px] tracking-wide text-ink">{STATUS_LABEL[status]}</div>
         </div>
-        <div className="rounded-full border border-ink/10 bg-paper/70 px-2 py-0.5 text-[11px] text-ink/70">
+        <div className="rounded-full border border-white/10 bg-bg1 px-2 py-0.5 text-[11px] text-muted">
           {count}
         </div>
       </header>
-      <div className="min-h-0 flex-1 rounded-3xl border border-ink/10 bg-paper/35 p-2 shadow-[inset_0_1px_0_rgba(10,10,10,0.06)]">
+      <div className="min-h-0 flex-1 rounded-3xl border border-white/10 bg-bg1 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
         {children}
       </div>
     </section>
@@ -131,7 +173,7 @@ function ColumnDropTarget({ status }: { status: Status }) {
       ref={setNodeRef}
       className={clsx(
         "rounded-2xl border border-dashed px-3 py-3 text-center text-[12px]",
-        isOver ? "border-hot/50 bg-hot/10 text-hot" : "border-ink/10 bg-paper/20 text-ink/45"
+        isOver ? "border-hot/50 bg-hot/10 text-hot" : "border-white/10 bg-bg0/30 text-muted"
       )}
     >
       Drop to move
@@ -180,7 +222,7 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
         onClick={() => setOpen((v) => !v)}
         className={clsx(
           "rounded-full border px-3 py-1.5 text-[13px]",
-          "border-ink/15 bg-paper/70 text-ink hover:border-ink/25",
+          "border-white/10 bg-bg1 text-ink hover:border-white/20",
           "shadow-sm"
         )}
       >
@@ -188,7 +230,7 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
       </button>
 
       {open ? (
-        <div className="w-full rounded-3xl border border-ink/10 bg-paper/70 p-3 shadow-sm">
+        <div className="w-full rounded-3xl border border-white/10 bg-bg1 p-3 shadow-sm">
           <div className="grid gap-2 md:grid-cols-3">
             <label className="md:col-span-2">
               <div className="mb-1 text-[11px] tracking-wide text-ink/60">Title</div>
@@ -196,7 +238,7 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Ship the thing"
-                className="w-full rounded-2xl border border-ink/10 bg-paper/60 px-3 py-2 text-[13px] text-ink placeholder:text-ink/35 outline-none focus:border-ink/25"
+                className="w-full rounded-2xl border border-white/10 bg-bg2 px-3 py-2 text-[13px] text-ink placeholder:text-muted/60 outline-none focus:border-white/20"
               />
             </label>
 
@@ -205,7 +247,7 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
               <select
                 value={assignee}
                 onChange={(e) => setAssignee(e.target.value as Assignee)}
-                className="w-full rounded-2xl border border-ink/10 bg-paper/60 px-3 py-2 text-[13px] text-ink outline-none focus:border-ink/25"
+                className="w-full rounded-2xl border border-white/10 bg-bg2 px-3 py-2 text-[13px] text-ink outline-none focus:border-white/20"
               >
                 {ASSIGNEES.map((a) => (
                   <option key={a} value={a}>
@@ -221,7 +263,7 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Tiny context so future-us doesn't suffer"
-                className="min-h-[72px] w-full resize-none rounded-2xl border border-ink/10 bg-paper/60 px-3 py-2 text-[13px] text-ink placeholder:text-ink/35 outline-none focus:border-ink/25"
+                className="min-h-[72px] w-full resize-none rounded-2xl border border-white/10 bg-bg2 px-3 py-2 text-[13px] text-ink placeholder:text-muted/60 outline-none focus:border-white/20"
               />
             </label>
 
@@ -230,7 +272,7 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Priority)}
-                className="w-full rounded-2xl border border-ink/10 bg-paper/60 px-3 py-2 text-[13px] text-ink outline-none focus:border-ink/25"
+                className="w-full rounded-2xl border border-white/10 bg-bg2 px-3 py-2 text-[13px] text-ink outline-none focus:border-white/20"
               >
                 {PRIORITIES.map((p) => (
                   <option key={p} value={p}>
@@ -245,7 +287,7 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value as Status)}
-                className="w-full rounded-2xl border border-ink/10 bg-paper/60 px-3 py-2 text-[13px] text-ink outline-none focus:border-ink/25"
+                className="w-full rounded-2xl border border-white/10 bg-bg2 px-3 py-2 text-[13px] text-ink outline-none focus:border-white/20"
               >
                 {STATUSES.map((s) => (
                   <option key={s} value={s}>
@@ -258,7 +300,7 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
             <div className="flex items-end justify-end gap-2 md:col-span-3">
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-full border border-ink/15 bg-transparent px-3 py-1.5 text-[13px] text-ink/80 hover:border-ink/25"
+                className="rounded-full border border-white/10 bg-transparent px-3 py-1.5 text-[13px] text-ink/80 hover:border-white/20"
               >
                 Cancel
               </button>
@@ -316,7 +358,7 @@ function DraggableCard({
                     task.priority === "high" ? "med" : task.priority === "med" ? "low" : "high",
                 })
               }
-              className="rounded-full border border-ink/10 bg-paper/45 px-2 py-1 text-[11px] text-ink/65 hover:border-ink/20"
+              className="rounded-full border border-white/10 bg-bg1 px-2 py-1 text-[11px] text-muted hover:border-white/20"
             >
               priority ↻
             </button>
@@ -333,7 +375,7 @@ function DraggableCard({
                           : "unassigned",
                 })
               }
-              className="rounded-full border border-ink/10 bg-paper/45 px-2 py-1 text-[11px] text-ink/65 hover:border-ink/20"
+              className="rounded-full border border-white/10 bg-bg1 px-2 py-1 text-[11px] text-muted hover:border-white/20"
             >
               assignee ↻
             </button>
@@ -483,24 +525,24 @@ export function Board() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="flex items-center gap-3">
-                <div className="relative grid h-11 w-11 place-items-center rounded-2xl border border-ink/15 bg-paper/60 shadow-sm">
-                  <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_30%_20%,rgba(255,61,126,0.16),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(255,186,77,0.18),transparent_55%)]" />
+                <div className="relative grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-bg1 shadow-sm">
+                  <div className="absolute inset-0 rounded-2xl aurora bg-[radial-gradient(circle_at_30%_20%,rgba(98,230,255,0.20),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(255,126,68,0.20),transparent_58%)]" />
                   <div className="relative font-display text-lg text-ink">C</div>
                 </div>
                 <div>
                   <h1 className="font-display text-3xl tracking-tight text-ink">Clawban</h1>
-                  <p className="mt-1 max-w-[70ch] text-[13px] leading-relaxed text-ink/65">
+                  <p className="mt-1 max-w-[70ch] text-[13px] leading-relaxed text-muted">
                     A shared work ledger for <span className="text-ink">Rajin</span> ↔ <span className="text-ink">Aria</span>.
                     Public view. Private edits.
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-ink/60">
-                    <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
-                      storage: <span className="font-mono">{storage === "db" ? "neon" : "json"}</span>
+                    <span className="rounded-full border border-white/10 bg-bg1 px-2 py-0.5">
+                      storage: <span className="font-mono text-ink">{storage === "db" ? "neon" : "json"}</span>
                     </span>
-                    <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
-                      tasks: <span className="font-mono">{tasks.length}</span>
+                    <span className="rounded-full border border-white/10 bg-bg1 px-2 py-0.5">
+                      tasks: <span className="font-mono text-ink">{tasks.length}</span>
                     </span>
-                    <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
+                    <span className="rounded-full border border-white/10 bg-bg1 px-2 py-0.5">
                       mode:{" "}
                       <span className={clsx("font-mono", canEdit ? "text-hot" : "text-ink")}>{canEdit ? "edit" : "view"}</span>
                     </span>
@@ -514,7 +556,7 @@ export function Board() {
                 onClick={refresh}
                 className={clsx(
                   "rounded-full border px-3 py-1.5 text-[13px]",
-                  "border-ink/15 bg-paper/70 text-ink hover:border-ink/25",
+                  "border-white/10 bg-bg1 text-ink hover:border-white/20",
                   "shadow-sm"
                 )}
               >
@@ -576,7 +618,7 @@ export function Board() {
                         ))}
                       </SortableContext>
                       {items.length === 0 ? (
-                        <div className="rounded-2xl border border-ink/10 bg-paper/30 px-3 py-4 text-center text-[12px] text-ink/50">
+                        <div className="rounded-2xl border border-white/10 bg-bg0/20 px-3 py-4 text-center text-[12px] text-muted">
                           Empty.
                         </div>
                       ) : null}
@@ -596,19 +638,17 @@ export function Board() {
           </DragOverlay>
         </DndContext>
 
-        <footer className="mt-8 text-[12px] text-ink/55">
+        <footer className="mt-8 text-[12px] text-muted">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
-                storage: <span className="font-mono">{storage === "db" ? "neon (postgres)" : "local json"}</span>
+              <span className="rounded-full border border-white/10 bg-bg1 px-2 py-0.5">
+                storage: <span className="font-mono text-ink">{storage === "db" ? "neon (postgres)" : "local json"}</span>
               </span>
-              <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
-                api: <span className="font-mono">/api/tasks</span>
+              <span className="rounded-full border border-white/10 bg-bg1 px-2 py-0.5">
+                api: <span className="font-mono text-ink">/api/tasks</span>
               </span>
             </div>
-            <div className="text-ink/55">
-              Public view · Private edits (password unlock or agent token)
-            </div>
+            <div className="text-muted">Public view · Private edits (password unlock or agent token)</div>
           </div>
         </footer>
       </div>
