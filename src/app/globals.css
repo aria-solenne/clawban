@@ -1,27 +1,41 @@
 @import "tailwindcss";
 
 :root {
-  /* Dark-by-default palette (no glassmorphism): */
-  --bg0: 8 10 16; /* deep ink */
-  --bg1: 13 16 26; /* panel */
-  --bg2: 18 22 36; /* card */
-  --ink: 232 234 241; /* text */
-  --muted: 170 176 196;
+  /* Aria palette (gold/off-white/teal/warm purple) — dark base, off-white accents */
+  --bg0: 9 10 16; /* deep ink */
+  --bg1: 14 16 26; /* panel */
+  --bg2: 18 21 34; /* card */
 
-  --aria: 98 230 255; /* teal */
-  --rajin: 255 126 68; /* ember */
-  --hot: 255 61 126; /* pink */
-  --warn: 255 186 77; /* amber */
+  --ink: 245 241 232; /* off-white */
+  --muted: 184 176 198; /* lavender-gray */
+
+  --gold: 255 204 122;
+  --teal: 96 238 212;
+  --violet: 179 140 255;
+  --warm: 255 146 122;
+
+  --aria: 96 238 212; /* teal */
+  --rajin: 255 204 122; /* gold */
+  --hot: 255 115 190; /* warm pink */
+  --warn: 255 204 122; /* gold */
 }
 
 @theme inline {
   --color-bg0: rgb(var(--bg0));
   --color-bg1: rgb(var(--bg1));
   --color-bg2: rgb(var(--bg2));
+
   --color-ink: rgb(var(--ink));
   --color-muted: rgb(var(--muted));
+
+  --color-gold: rgb(var(--gold));
+  --color-teal: rgb(var(--teal));
+  --color-violet: rgb(var(--violet));
+  --color-warm: rgb(var(--warm));
+
   --color-hot: rgb(var(--hot));
   --color-warn: rgb(var(--warn));
+
   --color-aria: rgb(var(--aria));
   --color-rajin: rgb(var(--rajin));
 
@@ -39,9 +53,10 @@ body {
   color: rgb(var(--ink));
   font-family: var(--font-body), ui-sans-serif, system-ui;
   background:
-    radial-gradient(800px 520px at 12% 16%, rgba(98, 230, 255, 0.14), transparent 55%),
-    radial-gradient(900px 650px at 82% 72%, rgba(255, 126, 68, 0.13), transparent 58%),
-    radial-gradient(700px 500px at 55% 110%, rgba(255, 61, 126, 0.10), transparent 55%),
+    radial-gradient(900px 620px at 18% 14%, rgba(96, 238, 212, 0.18), transparent 60%),
+    radial-gradient(900px 620px at 78% 22%, rgba(179, 140, 255, 0.18), transparent 62%),
+    radial-gradient(820px 560px at 60% 92%, rgba(255, 204, 122, 0.16), transparent 60%),
+    radial-gradient(700px 520px at 92% 80%, rgba(255, 146, 122, 0.10), transparent 60%),
     linear-gradient(180deg, rgb(var(--bg0)), rgb(var(--bg1)));
 }
 
@@ -52,23 +67,24 @@ body::before {
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(1200px 600px at 10% 10%, rgba(98, 230, 255, 0.06), transparent 60%),
-    radial-gradient(900px 520px at 85% 70%, rgba(255, 126, 68, 0.06), transparent 60%),
+    radial-gradient(1100px 560px at 14% 12%, rgba(96, 238, 212, 0.07), transparent 62%),
+    radial-gradient(1100px 560px at 82% 20%, rgba(179, 140, 255, 0.07), transparent 62%),
+    radial-gradient(1000px 600px at 70% 92%, rgba(255, 204, 122, 0.06), transparent 62%),
     repeating-linear-gradient(
       0deg,
-      rgba(232, 234, 241, 0.045) 0px,
-      rgba(232, 234, 241, 0.045) 1px,
+      rgba(245, 241, 232, 0.050) 0px,
+      rgba(245, 241, 232, 0.050) 1px,
       transparent 1px,
       transparent 30px
     ),
     repeating-linear-gradient(
       90deg,
-      rgba(232, 234, 241, 0.035) 0px,
-      rgba(232, 234, 241, 0.035) 1px,
+      rgba(245, 241, 232, 0.040) 0px,
+      rgba(245, 241, 232, 0.040) 1px,
       transparent 1px,
       transparent 30px
     );
-  opacity: 0.35;
+  opacity: 0.28;
   mix-blend-mode: screen;
 }
 

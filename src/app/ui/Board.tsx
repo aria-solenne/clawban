@@ -65,13 +65,24 @@ function AssigneeBadge({ assignee }: { assignee: Assignee }) {
         ? "/avatars/aria.jpg"
         : null;
 
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] tracking-wide",
-        "border-white/10 bg-bg1 text-ink/80"
-      )}
-    >
+  const href =
+    assignee === "rajin"
+      ? "https://rajinkhan.com"
+      : assignee === "aria"
+        ? "https://aria-self-site.vercel.app"
+        : null;
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className={clsx(
+          "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] tracking-wide",
+          "border-white/10 bg-bg1 text-ink/80 hover:border-white/20"
+        )}
+      >
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -79,14 +90,27 @@ function AssigneeBadge({ assignee }: { assignee: Assignee }) {
           alt={assignee}
           className={clsx(
             "h-4 w-4 rounded-full object-cover",
-            assignee === "aria" && "ring-1 ring-aria/40",
-            assignee === "rajin" && "ring-1 ring-rajin/40"
+            assignee === "aria" && "ring-1 ring-teal/50",
+            assignee === "rajin" && "ring-1 ring-gold/45"
           )}
           loading="lazy"
         />
       ) : (
         <span className="h-4 w-4 rounded-full border border-white/10 bg-bg2" />
       )}
+        <span>{assignee.toUpperCase()}</span>
+      </a>
+    );
+  }
+
+  return (
+    <span
+      className={clsx(
+        "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] tracking-wide",
+        "border-white/10 bg-bg1 text-ink/80"
+      )}
+    >
+      <span className="h-4 w-4 rounded-full border border-white/10 bg-bg2" />
       <span>{assignee.toUpperCase()}</span>
     </span>
   );
@@ -532,8 +556,25 @@ export function Board() {
                 <div>
                   <h1 className="font-display text-3xl tracking-tight text-ink">Clawban</h1>
                   <p className="mt-1 max-w-[70ch] text-[13px] leading-relaxed text-muted">
-                    A shared work ledger for <span className="text-ink">Rajin</span> ↔ <span className="text-ink">Aria</span>.
-                    Public view. Private edits.
+                    A shared work ledger for{" "}
+                    <a
+                      href="https://rajinkhan.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-ink underline decoration-white/20 underline-offset-4 hover:decoration-gold/60"
+                    >
+                      Rajin
+                    </a>{" "}
+                    ↔{" "}
+                    <a
+                      href="https://aria-self-site.vercel.app"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-ink underline decoration-white/20 underline-offset-4 hover:decoration-teal/60"
+                    >
+                      Aria
+                    </a>
+                    . Public view. Private edits.
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-ink/60">
                     <span className="rounded-full border border-white/10 bg-bg1 px-2 py-0.5">
@@ -648,7 +689,27 @@ export function Board() {
                 api: <span className="font-mono text-ink">/api/tasks</span>
               </span>
             </div>
-            <div className="text-muted">Public view · Private edits (password unlock or agent token)</div>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted">
+              <span>Public view · Private edits (password unlock or agent token)</span>
+              <span className="opacity-60">·</span>
+              <a
+                href="https://rajinkhan.com"
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-white/15 underline-offset-4 hover:decoration-gold/60"
+              >
+                rajinkhan.com
+              </a>
+              <span className="opacity-60">·</span>
+              <a
+                href="https://aria-self-site.vercel.app"
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-white/15 underline-offset-4 hover:decoration-teal/60"
+              >
+                aria-self-site
+              </a>
+            </div>
           </div>
         </footer>
       </div>
