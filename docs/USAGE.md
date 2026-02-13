@@ -85,6 +85,12 @@ Body:
 
 `DELETE /api/tasks/:id`
 
+## Defaults
+
+When Aria creates tasks inferred from chat context (unless Rajin specifies otherwise):
+- `assignee`: `aria`
+- `priority`: `med`
+
 ## Ops: Aria workflow
 
 - Rajin might assign tasks either:
