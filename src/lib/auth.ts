@@ -89,7 +89,7 @@ export async function unlockWithPassword(pw: string): Promise<boolean> {
   jar.set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
-    secure: false, // local http
+    secure: process.env.NODE_ENV === "production", // https on Vercel
     path: "/",
     expires: new Date(exp),
   });
@@ -102,7 +102,7 @@ export async function lock(): Promise<void> {
   jar.set(COOKIE, "", {
     httpOnly: true,
     sameSite: "lax",
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     expires: new Date(0),
   });

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { canEditFromRequest, lock, unlockWithPassword } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 export async function GET() {
   const canEdit = await canEditFromRequest();

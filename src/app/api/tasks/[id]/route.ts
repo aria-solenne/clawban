@@ -5,6 +5,7 @@ import { requireEdit } from "@/lib/auth";
 import { ASSIGNEES, PRIORITIES, STATUSES } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const PatchSchema = z
   .object({
