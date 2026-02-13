@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  /* Palette: warm paper + ink + two accents */
+  --paper: 255 248 236; /* #FFF8EC */
+  --paper-2: 250 237 217; /* #FAEDD9 */
+  --ink: 17 17 20; /* near-black */
+  --hot: 255 61 126; /* punchy pink */
+  --warn: 255 186 77; /* amber */
+}
+
+@theme inline {
+  --color-paper: rgb(var(--paper));
+  --color-paper-2: rgb(var(--paper-2));
+  --color-ink: rgb(var(--ink));
+  --color-hot: rgb(var(--hot));
+  --color-warn: rgb(var(--warn));
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  color: rgb(var(--ink));
+  font-family: var(--font-body), ui-sans-serif, system-ui;
+  background:
+    radial-gradient(900px 600px at 12% 18%, rgba(255, 61, 126, 0.08), transparent 60%),
+    radial-gradient(900px 600px at 82% 75%, rgba(255, 186, 77, 0.10), transparent 55%),
+    linear-gradient(180deg, rgba(255, 248, 236, 1), rgba(250, 237, 217, 1));
+}
+
+/* Subtle paper grain + grid */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(17, 17, 20, 0.035) 0px,
+      rgba(17, 17, 20, 0.035) 1px,
+      transparent 1px,
+      transparent 28px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(17, 17, 20, 0.028) 0px,
+      rgba(17, 17, 20, 0.028) 1px,
+      transparent 1px,
+      transparent 28px
+    );
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+  opacity: 0.18;
+}
+
+.font-display {
+  font-family: var(--font-display), ui-serif, Georgia;
+}

@@ -1,0 +1,24 @@
+{
+  "tasks": [
+    {
+      "id": "seed-1",
+      "title": "Set up Clawban v1",
+      "description": "Scaffold Next.js app, local JSON storage, kanban UI.",
+      "assignee": "aria",
+      "status": "in_progress",
+      "priority": "high",
+      "createdAt": "2026-02-13T00:00:00.000Z",
+      "updatedAt": "2026-02-13T00:00:00.000Z"
+    },
+    {
+      "id": "seed-2",
+      "title": "Add first real task",
+      "description": "Rajin: drop a task here and I'll keep it updated.",
+      "assignee": "rajin",
+      "status": "todo",
+      "priority": "med",
+      "createdAt": "2026-02-13T00:00:00.000Z",
+      "updatedAt": "2026-02-13T00:00:00.000Z"
+    }
+  ]
+}
