@@ -38,6 +38,10 @@ async function ensureFile() {
  * - If DATABASE_URL is set -> Postgres (Neon)
  * - Else -> local JSON file (Pi)
  */
+export function storageMode(): "db" | "json" {
+  return sql() ? "db" : "json";
+}
+
 export async function readBoard(): Promise<Board> {
   if (sql()) return readBoardDb();
   await ensureFile();

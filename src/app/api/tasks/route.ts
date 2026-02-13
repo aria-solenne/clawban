@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { readBoard, upsertTask } from "@/lib/store";
+import { readBoard, storageMode, upsertTask } from "@/lib/store";
 import { requireEdit } from "@/lib/auth";
 import { ASSIGNEES, PRIORITIES, STATUSES } from "@/lib/types";
 
@@ -17,7 +17,7 @@ const CreateSchema = z.object({
 
 export async function GET() {
   const board = await readBoard();
-  return NextResponse.json(board);
+  return NextResponse.json({ ...board, meta: { storage: storageMode() } });
 }
 
 export async function POST(req: Request) {

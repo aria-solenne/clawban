@@ -14,9 +14,14 @@ import { CSS } from "@dnd-kit/utilities";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import clsx from "clsx";
 
-import type { Assignee, Board as BoardT, Priority, Status, Task } from "@/lib/types";
+import type { Assignee, Priority, Status, Task } from "@/lib/types";
 import { UnlockEditing } from "@/app/ui/UnlockEditing";
 import { ASSIGNEES, PRIORITIES, STATUSES, STATUS_LABEL } from "@/lib/types";
+
+type ApiBoard = {
+  tasks: Task[];
+  meta?: { storage?: "db" | "json" };
+};
 
 function byUpdatedDesc(a: Task, b: Task) {
   return b.updatedAt.localeCompare(a.updatedAt);
@@ -279,10 +284,12 @@ function NewTask({ onCreate }: { onCreate: (task: Task) => void }) {
 function DraggableCard({
   task,
   onQuickPatch,
+  onDelete,
   canEdit,
 }: {
   task: Task;
   onQuickPatch: (id: string, patch: Partial<Task>) => void;
+  onDelete: (id: string) => void;
   canEdit: boolean;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -330,6 +337,14 @@ function DraggableCard({
             >
               assignee ↻
             </button>
+            <button
+              onClick={() => {
+                if (confirm("Delete this task?")) onDelete(task.id);
+              }}
+              className="rounded-full border border-hot/25 bg-hot/10 px-2 py-1 text-[11px] text-hot hover:bg-hot/15"
+            >
+              delete
+            </button>
           </div>
 
           <span className="text-[10px] text-ink/40">drag me</span>
@@ -340,7 +355,7 @@ function DraggableCard({
 }
 
 export function Board() {
-  const [board, setBoard] = React.useState<BoardT | null>(null);
+  const [board, setBoard] = React.useState<ApiBoard | null>(null);
   const [err, setErr] = React.useState<string | null>(null);
   const [activeId, setActiveId] = React.useState<string | null>(null);
   const [canEdit, setCanEdit] = React.useState(false);
@@ -349,7 +364,7 @@ export function Board() {
 
   React.useEffect(() => {
     let alive = true;
-    Promise.all([api<BoardT>("/api/tasks"), api<{ canEdit: boolean }>("/api/auth")])
+    Promise.all([api<ApiBoard>("/api/tasks"), api<{ canEdit: boolean }>("/api/auth")])
       .then(([b, a]) => {
         if (!alive) return;
         b.tasks.sort(byUpdatedDesc);
@@ -363,6 +378,7 @@ export function Board() {
   }, []);
 
   const tasks = React.useMemo(() => board?.tasks ?? [], [board]);
+  const storage = board?.meta?.storage ?? "json";
   const byStatus: Record<Status, Task[]> = React.useMemo(() => {
     const init = STATUSES.reduce((acc, s) => {
       acc[s] = [];
@@ -376,10 +392,25 @@ export function Board() {
 
   const activeTask = activeId ? tasks.find((t) => t.id === activeId) : null;
 
+  async function removeTask(id: string) {
+    const prev = board;
+    if (!prev) return;
+
+    setBoard({ ...prev, tasks: prev.tasks.filter((t) => t.id !== id) });
+
+    try {
+      await api<{ ok: true }>(`/api/tasks/${id}`, { method: "DELETE" });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Delete failed");
+      setBoard(prev);
+    }
+  }
+
   async function patchTask(id: string, patch: Partial<Task>) {
     const prev = board;
     if (!prev) return;
     setBoard({
+      ...prev,
       tasks: prev.tasks
         .map((t) => (t.id === id ? ({ ...t, ...patch, updatedAt: new Date().toISOString() } as Task) : t))
         .sort(byUpdatedDesc),
@@ -391,12 +422,32 @@ export function Board() {
       });
       setBoard((cur) => {
         if (!cur) return cur;
-        return { tasks: cur.tasks.map((t) => (t.id === id ? res.task : t)).sort(byUpdatedDesc) };
+        return { ...cur, tasks: cur.tasks.map((t) => (t.id === id ? res.task : t)).sort(byUpdatedDesc) };
       });
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Update failed");
       setBoard(prev);
     }
+  }
+
+  async function refresh() {
+    try {
+      const [b, a] = await Promise.all([api<ApiBoard>("/api/tasks"), api<{ canEdit: boolean }>("/api/auth")]);
+      b.tasks.sort(byUpdatedDesc);
+      setBoard(b);
+      setCanEdit(a.canEdit);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Refresh failed");
+    }
+  }
+
+  async function lockEdits() {
+    try {
+      await api("/api/auth", { method: "DELETE" });
+    } catch {
+      // ignore
+    }
+    setCanEdit(false);
   }
 
   function onDragEnd(e: DragEndEvent) {
@@ -439,18 +490,57 @@ export function Board() {
                 <div>
                   <h1 className="font-display text-3xl tracking-tight text-ink">Clawban</h1>
                   <p className="mt-1 max-w-[70ch] text-[13px] leading-relaxed text-ink/65">
-                    Local-only kanban on the Pi. No auth. Just work. Drag cards between columns; everything
-                    persists to a JSON file.
+                    A shared work ledger for <span className="text-ink">Rajin</span> ↔ <span className="text-ink">Aria</span>.
+                    Public view. Private edits.
                   </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-ink/60">
+                    <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
+                      storage: <span className="font-mono">{storage === "db" ? "neon" : "json"}</span>
+                    </span>
+                    <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
+                      tasks: <span className="font-mono">{tasks.length}</span>
+                    </span>
+                    <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
+                      mode:{" "}
+                      <span className={clsx("font-mono", canEdit ? "text-hot" : "text-ink")}>{canEdit ? "edit" : "view"}</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={refresh}
+                className={clsx(
+                  "rounded-full border px-3 py-1.5 text-[13px]",
+                  "border-ink/15 bg-paper/70 text-ink hover:border-ink/25",
+                  "shadow-sm"
+                )}
+              >
+                Refresh
+              </button>
+
+              {canEdit ? (
+                <button
+                  onClick={lockEdits}
+                  className={clsx(
+                    "rounded-full border px-3 py-1.5 text-[13px]",
+                    "border-warn/30 bg-warn/10 text-warn hover:bg-warn/15",
+                    "shadow-sm"
+                  )}
+                >
+                  Lock
+                </button>
+              ) : null}
+
               {canEdit ? (
                 <NewTask
                   onCreate={(task) =>
-                    setBoard((cur) => ({ tasks: [task, ...(cur?.tasks ?? [])].sort(byUpdatedDesc) }))
+                    setBoard((cur) => ({
+                      ...(cur ?? { tasks: [], meta: { storage } }),
+                      tasks: [task, ...(cur?.tasks ?? [])].sort(byUpdatedDesc),
+                    }))
                   }
                 />
               ) : (
@@ -476,7 +566,13 @@ export function Board() {
                       <ColumnDropTarget status={status} />
                       <SortableContext items={items.map((t) => t.id)} strategy={verticalListSortingStrategy}>
                         {items.map((t) => (
-                          <DraggableCard key={t.id} task={t} onQuickPatch={patchTask} canEdit={canEdit} />
+                          <DraggableCard
+                            key={t.id}
+                            task={t}
+                            onQuickPatch={patchTask}
+                            onDelete={removeTask}
+                            canEdit={canEdit}
+                          />
                         ))}
                       </SortableContext>
                       {items.length === 0 ? (
@@ -502,10 +598,17 @@ export function Board() {
 
         <footer className="mt-8 text-[12px] text-ink/55">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              Data file: <span className="font-mono">./data/board.json</span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
+                storage: <span className="font-mono">{storage === "db" ? "neon (postgres)" : "local json"}</span>
+              </span>
+              <span className="rounded-full border border-ink/10 bg-paper/60 px-2 py-0.5">
+                api: <span className="font-mono">/api/tasks</span>
+              </span>
             </div>
-            <div>v1: private link, no auth — we add auth/DB later if you want.</div>
+            <div className="text-ink/55">
+              Public view · Private edits (password unlock or agent token)
+            </div>
           </div>
         </footer>
       </div>
