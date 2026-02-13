@@ -26,6 +26,11 @@ Open:
 - Local: http://localhost:3042
 - LAN:   http://<pi-ip>:3042
 
+## Deploy / persistence note
+
+- Local (Pi) mode uses `./data/board.json`.
+- Deployed mode (Vercel) should set `DATABASE_URL` (Neon Postgres recommended). If `DATABASE_URL` is set, Clawban uses Postgres.
+
 ## Notes
 
 - API:

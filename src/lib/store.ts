@@ -3,6 +3,8 @@ import path from "node:path";
 import { z } from "zod";
 import type { Board, Task } from "@/lib/types";
 import { ASSIGNEES, PRIORITIES, STATUSES } from "@/lib/types";
+import { sql } from "@/lib/db";
+import { deleteTaskDb, readBoardDb, upsertTaskDb } from "@/lib/store-db";
 
 const TaskSchema = z.object({
   id: z.string().min(1),
@@ -31,7 +33,13 @@ async function ensureFile() {
   }
 }
 
+/**
+ * Storage strategy:
+ * - If DATABASE_URL is set -> Postgres (Neon)
+ * - Else -> local JSON file (Pi)
+ */
 export async function readBoard(): Promise<Board> {
+  if (sql()) return readBoardDb();
   await ensureFile();
   const raw = await fs.readFile(dataPath(), "utf8");
   const parsed = JSON.parse(raw);
@@ -39,12 +47,16 @@ export async function readBoard(): Promise<Board> {
 }
 
 export async function writeBoard(board: Board): Promise<void> {
+  // JSON mode only (DB writes happen via upsert/delete)
+  if (sql()) throw new Error("DB_MODE_NO_WRITEBOARD");
   await ensureFile();
   BoardSchema.parse(board);
   await fs.writeFile(dataPath(), JSON.stringify(board, null, 2) + "\n", "utf8");
 }
 
 export async function upsertTask(patch: Partial<Task> & Pick<Task, "id">): Promise<Task> {
+  if (sql()) return upsertTaskDb(patch);
+
   const board = await readBoard();
   const now = new Date().toISOString();
 
@@ -81,6 +93,8 @@ export async function upsertTask(patch: Partial<Task> & Pick<Task, "id">): Promi
 }
 
 export async function deleteTask(id: string): Promise<void> {
+  if (sql()) return deleteTaskDb(id);
+
   const board = await readBoard();
   board.tasks = board.tasks.filter((t) => t.id !== id);
   await writeBoard(board);
